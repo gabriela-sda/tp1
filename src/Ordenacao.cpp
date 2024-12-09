@@ -2,16 +2,19 @@
 #include "../include/Ordenacao.h"
 
 Ordenacao::Ordenacao(Registro** registros, int contadorRegistros) {
-        numRegistros = contadorRegistros;
-        for(int i = 0; i < numRegistros; i++) {
-            listaRegistros[i] = registros[i];
-        }
+    numRegistros = (contadorRegistros < MAX_REGISTROS) ? contadorRegistros : MAX_REGISTROS;
+    for(int i = 0; i < numRegistros; i++) {
+        listaRegistros[i] = registros[i];
     }
+    for(int i = numRegistros; i < MAX_REGISTROS; i++) {
+        listaRegistros[i] = nullptr;
+    }
+}
 
 Ordenacao::~Ordenacao() {
-    for (int i = 0; i < numRegistros; ++i) {
-        listaRegistros[i] = nullptr; // Apenas limpa os ponteiros
-    }
+    /*for (int i = 0; i < numRegistros; ++i) {
+        listaRegistros[i] = nullptr;
+    }*/
 }
 
 void Ordenacao::trocar(int i, int j) {
@@ -171,7 +174,9 @@ void Ordenacao::mergeSort(int inicio, int fim, int criterio) {
 
 void Ordenacao::printRegistros() const {
     for (int i = 0; i < numRegistros; ++i) {
-        listaRegistros[i]->printRegistro();
+        if (listaRegistros[i] != nullptr) {
+            listaRegistros[i]->printRegistro();
+            }
     }
     std::cout << std::endl;
 }

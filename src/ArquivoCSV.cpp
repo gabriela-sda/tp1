@@ -26,7 +26,7 @@ namespace ArquivoCSV {
         std::string linha;
         int contadorLinha = 0;
 
-        while (std::getline(arquivo, linha)) {
+        while (std::getline(arquivo, linha) && contadorRegistros < 10000) {
             contadorLinha++;
 
             // Ignora as primeiras 6 linhas

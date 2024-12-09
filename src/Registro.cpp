@@ -16,7 +16,7 @@ std::string Registro::getNome() const {
 
 long long Registro::getCPF() const {
      return CPF; 
-     }
+    }
 
 std::string Registro::getEndereco() const { 
     return endereco; 

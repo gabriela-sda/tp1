@@ -4,6 +4,8 @@
 #include "../include/Registro.h"
 #include "../include/Ordenacao.h"
 
+const int MAX_REGISTROS = 10000;
+
 // Função para escolher o arquivo de entrada, caso nenhum seja passado
 const char* escolherArquivo() {
     // Lista de arquivos
@@ -17,11 +19,6 @@ const char* escolherArquivo() {
 
     int indice = 0;  // Índice padrão
     std::cout << "Escolha um arquivo: \n";
-    std::cout << "1. cad.r1000.p1000.xcsv\n";
-    std::cout << "2. cad.r1000.p5000.xcsv\n";
-    std::cout << "3. cad.r5000.p1000.xcsv\n";
-    std::cout << "4. cad.r5000.p5000.xcsv\n";
-    std::cout << "5. input.xcsv\n";
     std::cout << "Digite o número do arquivo: ";
     std::cin >> indice;
 
@@ -34,12 +31,13 @@ const char* escolherArquivo() {
 }
 
 int main(int argc, char* argv[]) {
+
     // Se um argumento for passado, usa ele. Caso contrário, escolhe um arquivo padrão.
     const char* arquivoEscolhido = (argc > 1) ? argv[1] : escolherArquivo();
 
     std::cout << "\nLendo arquivo: " << arquivoEscolhido << std::endl;
 
-    Registro* registros[10000]; // array de ponteiros para registros, com tamanho fixo
+    Registro* registros[MAX_REGISTROS] = {nullptr}; // array de ponteiros para registros, com tamanho fixo
     int contadorRegistros = 0; // conta a quantidade de registros
     std::string cabecalho; // Para armazenar as 6 primeiras linhas
 
@@ -54,23 +52,37 @@ int main(int argc, char* argv[]) {
         return 1;  // Termina o programa em caso de erro
     }
 
-    ArquivoCSV::lerArquivoCSV(arquivo, registros, contadorRegistros, cabecalho);
+    try {
+        ArquivoCSV::lerArquivoCSV(arquivo, registros, contadorRegistros, cabecalho);
+    } catch (const std::exception& e) {
+        std::cerr << "Erro ao ler arquivo: " << e.what() << std::endl;
+        // Libera memória em caso de erro
+        for (int i = 0; i < contadorRegistros; i++) {
+            delete registros[i];
+        }
+        return 1;
+    }
     arquivo.close();
+
+    if (contadorRegistros == 0) {
+        std::cerr << "Nenhum registro encontrado no arquivo." << std::endl;
+        return 1;
+    }
 
     Ordenacao ordenacao(registros, contadorRegistros);
 
-    //Ordenacao por nome
+    //Ordenacao por nome por quickSort
+    ordenacao.quickSort(0, contadorRegistros-1, 1);
+    std::cout << cabecalho;
+    ordenacao.printRegistros();
+
+    //Ordenacao por nome por heapSort
     ordenacao.heapSort(1);
     std::cout << cabecalho;
     ordenacao.printRegistros();
 
-    //Ordenacao por CPF
-    ordenacao.heapSort(2);
-    std::cout << cabecalho;
-    ordenacao.printRegistros();
-
-    //Ordenacao por endereco
-    ordenacao.heapSort(3);
+    //Ordenacao por nome por mergeSort
+    ordenacao.mergeSort(0, contadorRegistros-1, 1);
     std::cout << cabecalho;
     ordenacao.printRegistros();
 
@@ -79,6 +91,7 @@ int main(int argc, char* argv[]) {
     // Libera a memória dos registros
     for (int i = 0; i < contadorRegistros; i++) {
         delete registros[i];
+        registros[i] = nullptr;
     }
 
     return 0;
