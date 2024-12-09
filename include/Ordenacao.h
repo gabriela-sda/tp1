@@ -7,6 +7,7 @@ class Ordenacao {
     private:
     static const int MAX_REGISTROS = 10000;
     Registro* listaRegistros[MAX_REGISTROS]; //array de ponteiros para objetos Registro
+    Registro* listaInicial[MAX_REGISTROS];
     int numRegistros; //quantidade de registros no array
 
     void trocar(int i, int j);
@@ -24,6 +25,8 @@ class Ordenacao {
     void mergeSort(int inicio, int fim, int criterio);
 
     void printRegistros() const;
+    bool validarRegistros() const;
+    void reiniciarLista();
 };
 
 #endif // ORDENACAO_H

@@ -1,43 +1,49 @@
 #include <iostream>
 #include "../include/Ordenacao.h"
+#include "../include/memlog.h"
 
 Ordenacao::Ordenacao(Registro** registros, int contadorRegistros) {
     numRegistros = (contadorRegistros < MAX_REGISTROS) ? contadorRegistros : MAX_REGISTROS;
     for(int i = 0; i < numRegistros; i++) {
         listaRegistros[i] = registros[i];
+        listaInicial[i] = registros[i];
     }
     for(int i = numRegistros; i < MAX_REGISTROS; i++) {
         listaRegistros[i] = nullptr;
+        listaInicial[i] = nullptr;
     }
 }
 
-Ordenacao::~Ordenacao() {
-    /*for (int i = 0; i < numRegistros; ++i) {
-        listaRegistros[i] = nullptr;
-    }*/
-}
+Ordenacao::~Ordenacao() {}
 
 void Ordenacao::trocar(int i, int j) {
         Registro* temp = listaRegistros[i];
+        LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
+
         listaRegistros[i] = listaRegistros[j];
+        ESCREVEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
+        LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
+
         listaRegistros[j] = temp;
+        ESCREVEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
     }
 
 int Ordenacao::particionar(int inicio, int fim, int criterio) {
     Registro* pivo = listaRegistros[fim]; // Escolhe o último elemento como pivô
+    LEMEMLOG((long int)&listaRegistros[fim], sizeof(Registro), 0);
     int i = inicio - 1;
 
     for (int j = inicio; j < fim; ++j) {
         bool condicao = false;
-
-        // Verifica o critério de ordenação
-        if (criterio == 1) { // Nome
+        if (criterio == 1) {
             condicao = listaRegistros[j]->getNome() < pivo->getNome();
-        } else if (criterio == 2) { // CPF
+        } else if (criterio == 2) {
             condicao = listaRegistros[j]->getCPF() < pivo->getCPF();
-        } else if (criterio == 3) { // Endereço
+        } else if (criterio == 3) {
             condicao = listaRegistros[j]->getEndereco() < pivo->getEndereco();
         }
+        LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
+        LEMEMLOG((long int)&listaRegistros[fim], sizeof(Registro), 0);
 
         if (condicao) {
             ++i;
@@ -50,14 +56,23 @@ int Ordenacao::particionar(int inicio, int fim, int criterio) {
 
 bool Ordenacao::comparar(int i, int j, int criterio) {
     switch (criterio) {
-        case 1: // Ordenar por Nome
+        case 1:
+            LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
+            LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
             return listaRegistros[i]->getNome() > listaRegistros[j]->getNome();
-        case 2: // Ordenar por CPF
+
+        case 2:
+            LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
+            LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
             return listaRegistros[i]->getCPF() > listaRegistros[j]->getCPF();
-        case 3: // Ordenar por Endereço
+
+        case 3:
+            LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
+            LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
             return listaRegistros[i]->getEndereco() > listaRegistros[j]->getEndereco();
+
         default:
-            return false; // Caso critério inválido
+            return false;
         }
     }
 
@@ -87,41 +102,55 @@ void Ordenacao::merge(int inicio, int meio, int fim, int criterio) {
     int n1 = meio - inicio + 1;
     int n2 = fim - meio;
 
-    // Criando arrays temporários
+    // arrays temporários
     Registro* esq[n1];
     Registro* dir[n2];
 
     // Copiando os dados para os arrays temporários
     for (int i = 0; i < n1; i++) {
         esq[i] = listaRegistros[inicio + i];
+        ESCREVEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
+        LEMEMLOG((long int)&listaRegistros[inicio + i], sizeof(Registro), 0);
     }
     for (int j = 0; j < n2; j++) {
         dir[j] = listaRegistros[meio + 1 + j];
+        ESCREVEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
+        LEMEMLOG((long int)&listaRegistros[meio + 1 + j], sizeof(Registro), 0);
     }
 
     // Mesclando os arrays temporários de volta em listaRegistros[]
     int i = 0, j = 0, k = inicio;
     while (i < n1 && j < n2) {
         bool compara = false;
-
-        // Comparação com base no critério (1 = nome, 2 = CPF, 3 = endereço)
         switch (criterio) {
             case 1: // Ordenar por nome
                 compara = esq[i]->getNome() <= dir[j]->getNome();
+                LEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
+                LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
                 break;
+
             case 2: // Ordenar por CPF
                 compara = esq[i]->getCPF() <= dir[j]->getCPF();
+                LEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
+                LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
                 break;
+
             case 3: // Ordenar por endereço
                 compara = esq[i]->getEndereco() <= dir[j]->getEndereco();
+                LEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
+                LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
                 break;
         }
 
         if (compara) {
             listaRegistros[k] = esq[i];
+            ESCREVEMEMLOG((long int)&listaRegistros[k], sizeof(Registro), 0);
+            LEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
             i++;
         } else {
             listaRegistros[k] = dir[j];
+            ESCREVEMEMLOG((long int)&listaRegistros[k], sizeof(Registro), 0);
+            LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
             j++;
         }
         k++;
@@ -130,6 +159,8 @@ void Ordenacao::merge(int inicio, int meio, int fim, int criterio) {
     // Copiando os elementos restantes de esq[], se houver
     while (i < n1) {
         listaRegistros[k] = esq[i];
+        ESCREVEMEMLOG((long int)&listaRegistros[k], sizeof(Registro), 0);
+        LEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
         i++;
         k++;
     }
@@ -137,6 +168,8 @@ void Ordenacao::merge(int inicio, int meio, int fim, int criterio) {
     // Copiando os elementos restantes de dir[], se houver
     while (j < n2) {
         listaRegistros[k] = dir[j];
+        ESCREVEMEMLOG((long int)&listaRegistros[k], sizeof(Registro), 0);
+        LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
         j++;
         k++;
     }
@@ -179,4 +212,27 @@ void Ordenacao::printRegistros() const {
             }
     }
     std::cout << std::endl;
+}
+
+bool Ordenacao::validarRegistros() const {
+    for (int i = 0; i < numRegistros; ++i) {
+        if (listaRegistros[i] == nullptr) {
+            std::cerr << "Registro nulo encontrado no índice " << i << std::endl;
+            return false;
+        }
+
+        if (listaRegistros[i]->getNome().empty() || 
+            listaRegistros[i]->getCPF() <= 0 || 
+            listaRegistros[i]->getEndereco().empty()) {
+            std::cerr << "Registro inválido no índice " << i << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+void Ordenacao::reiniciarLista() {
+    for(int i = 0; i < numRegistros; i++) {
+        listaRegistros[i] = listaInicial[i];
+    }
 }

@@ -15,7 +15,7 @@ OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 # Regras
 all: criar_diretorios $(TARGET)
-	$(TARGET) # Executa o binário após a compilação
+	$(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)

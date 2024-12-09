@@ -6,8 +6,12 @@
 #include "../include/Registro.h"
 
 namespace ArquivoCSV {
+    enum class LeituraStatus {
+        SUCESSO,
+        ERRO_NUMERO
+    };
     // Função para converter string para long long com verificação de erro
-    long long safe_stoll(const std::string& str);
+    LeituraStatus safe_stoll(const std::string& str, long long& resultado);
 
     // Função para verificar se o arquivo existe
     bool arquivoExiste(const char* caminhoArquivo);
