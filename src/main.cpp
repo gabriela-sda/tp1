@@ -12,7 +12,7 @@ void logError(const std::string& mensagem) {
 }
 
 int main(int argc, char* argv[]) {
-    const char* arquivoEscolhido = "./data/input.xcsv";
+    const char* arquivoEscolhido = "./data/cad.r1000.p1000.xcsv";
     if (argc > 1) {
         arquivoEscolhido = argv[1];
     }
@@ -20,18 +20,18 @@ int main(int argc, char* argv[]) {
     std::cout << "\nLendo arquivo: " << arquivoEscolhido << std::endl;
 
     Registro* registros[MAX_REGISTROS] = {nullptr}; // array de ponteiros para registros, com tamanho fixo
-    int contadorRegistros = 0; // conta a quantidade de registros
-    std::string cabecalho; // Para armazenar as 6 primeiras linhas
+    int contadorRegistros = 0;
+    std::string cabecalho; 
 
     if (!ArquivoCSV::arquivoExiste(arquivoEscolhido)) {
         logError("Arquivo não encontrado: " + std::string(arquivoEscolhido));
-        return 1;  // Termina o programa em caso de erro
+        return 1;
     }
 
     std::ifstream arquivo(arquivoEscolhido);
     if (!arquivo.is_open()) {
         logError("Não foi possível abrir o arquivo: " + std::string(arquivoEscolhido));
-        return 1;  // Termina o programa em caso de erro
+        return 1;
     }
 
     try {
@@ -50,32 +50,32 @@ int main(int argc, char* argv[]) {
         logError("Nenhum registro válido encontrado.");
         return 1;
     }
-    const char* arquivoLog = "./bin/memlog.out";
-    iniciaMemLog(arquivoLog);
-    ativaMemLog();
-    defineFaseMemLog(0);
+    
+    //const char* arquivoLog = "./bin/memlog.out";
+    //iniciaMemLog(arquivoLog);
+    //ativaMemLog();
+    //defineFaseMemLog(0);
+
     Ordenacao ordenacao(registros, contadorRegistros);
     if (!ordenacao.validarRegistros()) {
         logError("Registros contêm dados inválidos.");
         return 1;
     }
-    ordenacao.quickSort(0, contadorRegistros-1, 1); //Ordenacao por nome por quickSort
-    std::cout << cabecalho;
-    ordenacao.printRegistros();
+    ordenacao.executarQuickSort(1); // 1 = ordenacao por nome, 2 = ordenacao por CPF, 3 = ordenacao por endereco
+    //std::cout << cabecalho;
+    //ordenacao.printRegistros();
 
-    defineFaseMemLog(1);
     ordenacao.reiniciarLista();
-    ordenacao.heapSort(1); //Ordenacao por nome por heapSort
-    std::cout << cabecalho;
-    ordenacao.printRegistros();
+    ordenacao.executarHeapSort(1); // 1 = ordenacao por nome, 2 = ordenacao por CPF, 3 = ordenacao por endereco
+    //std::cout << cabecalho;
+    //ordenacao.printRegistros();
 
-    defineFaseMemLog(2);
     ordenacao.reiniciarLista();
-    ordenacao.mergeSort(0, contadorRegistros-1, 1); //Ordenacao por nome por mergeSort
-    std::cout << cabecalho;
-    ordenacao.printRegistros();
+    ordenacao.executarMergeSort(1); // 1 = ordenacao por nome, 2 = ordenacao por CPF, 3 = ordenacao por endereco
+    //std::cout << cabecalho;
+    //ordenacao.printRegistros();
 
-    finalizaMemLog();
+    //finalizaMemLog();
 
     // Libera a memória dos registros
     for (int i = 0; i < contadorRegistros; i++) {

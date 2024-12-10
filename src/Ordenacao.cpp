@@ -35,6 +35,7 @@ int Ordenacao::particionar(int inicio, int fim, int criterio) {
 
     for (int j = inicio; j < fim; ++j) {
         bool condicao = false;
+        comparacoes++;
         if (criterio == 1) {
             condicao = listaRegistros[j]->getNome() < pivo->getNome();
         } else if (criterio == 2) {
@@ -59,16 +60,19 @@ bool Ordenacao::comparar(int i, int j, int criterio) {
         case 1:
             LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
             LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
+            comparacoes++;
             return listaRegistros[i]->getNome() > listaRegistros[j]->getNome();
 
         case 2:
             LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
             LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
+            comparacoes++;
             return listaRegistros[i]->getCPF() > listaRegistros[j]->getCPF();
 
         case 3:
             LEMEMLOG((long int)&listaRegistros[i], sizeof(Registro), 0);
             LEMEMLOG((long int)&listaRegistros[j], sizeof(Registro), 0);
+            comparacoes++;
             return listaRegistros[i]->getEndereco() > listaRegistros[j]->getEndereco();
 
         default:
@@ -77,24 +81,21 @@ bool Ordenacao::comparar(int i, int j, int criterio) {
     }
 
 void Ordenacao::reorganizarHeap(int n, int i, int criterio) {
-    int maior = i; // Inicializa o maior como raiz
-    int esquerda = 2 * i + 1; // Esquerda = 2*i + 1
-    int direita = 2 * i + 2; // Direita = 2*i + 2
+    int maior = i;
+    int esquerda = 2 * i + 1;
+    int direita = 2 * i + 2;
 
-    // Se o filho da esquerda for maior que a raiz
     if (esquerda < n && comparar(esquerda, maior, criterio)) {
         maior = esquerda;
     }
 
-    // Se o filho da direita for maior que o maior até agora
     if (direita < n && comparar(direita, maior, criterio)) {
         maior = direita;
     }
 
-    // Se o maior não for a raiz
     if (maior != i) {
-        trocar(i, maior); // Troca a raiz com o maior
-        reorganizarHeap(n, maior, criterio); // Recursivamente reorganiza o sub-árvore afetado
+        trocar(i, maior);
+        reorganizarHeap(n, maior, criterio);
     }
 }
 
@@ -102,25 +103,25 @@ void Ordenacao::merge(int inicio, int meio, int fim, int criterio) {
     int n1 = meio - inicio + 1;
     int n2 = fim - meio;
 
-    // arrays temporários
     Registro* esq[n1];
     Registro* dir[n2];
 
-    // Copiando os dados para os arrays temporários
     for (int i = 0; i < n1; i++) {
+        copias++;
         esq[i] = listaRegistros[inicio + i];
         ESCREVEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
         LEMEMLOG((long int)&listaRegistros[inicio + i], sizeof(Registro), 0);
     }
     for (int j = 0; j < n2; j++) {
+        copias++;
         dir[j] = listaRegistros[meio + 1 + j];
         ESCREVEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
         LEMEMLOG((long int)&listaRegistros[meio + 1 + j], sizeof(Registro), 0);
     }
 
-    // Mesclando os arrays temporários de volta em listaRegistros[]
     int i = 0, j = 0, k = inicio;
     while (i < n1 && j < n2) {
+        comparacoes++;
         bool compara = false;
         switch (criterio) {
             case 1: // Ordenar por nome
@@ -153,21 +154,24 @@ void Ordenacao::merge(int inicio, int meio, int fim, int criterio) {
             LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
             j++;
         }
+        copias++;
         k++;
     }
 
-    // Copiando os elementos restantes de esq[], se houver
+    // Copia os elementos restantes de esq[], se houver
     while (i < n1) {
         listaRegistros[k] = esq[i];
+        copias++;
         ESCREVEMEMLOG((long int)&listaRegistros[k], sizeof(Registro), 0);
         LEMEMLOG((long int)&esq[i], sizeof(Registro), 0);
         i++;
         k++;
     }
 
-    // Copiando os elementos restantes de dir[], se houver
+    // Copia os elementos restantes de dir[], se houver
     while (j < n2) {
         listaRegistros[k] = dir[j];
+        copias++;
         ESCREVEMEMLOG((long int)&listaRegistros[k], sizeof(Registro), 0);
         LEMEMLOG((long int)&dir[j], sizeof(Registro), 0);
         j++;
@@ -183,17 +187,37 @@ void Ordenacao::quickSort(int inicio, int fim, int criterio) {
     }
 }
 
+void Ordenacao::executarQuickSort(int criterio) {
+    comparacoes = 0; // Zera as contagens
+    copias = 0;
+
+    auto inicioTempo = std::chrono::high_resolution_clock::now();
+    quickSort(0, numRegistros - 1, criterio);
+    auto fimTempo = std::chrono::high_resolution_clock::now();
+
+    printRelatorio("QuickSort", fimTempo - inicioTempo);
+}
+
 void Ordenacao::heapSort(int criterio) {
-    // Construa o heap (reorganiza o array)
     for (int i = numRegistros / 2 - 1; i >= 0; i--) {
         reorganizarHeap(numRegistros, i, criterio);
     }
 
-    // Um a um, extraímos os elementos do heap
     for (int i = numRegistros - 1; i >= 1; i--) {
-        trocar(0, i); // Troca a raiz (máximo) com o último elemento
-        reorganizarHeap(i, 0, criterio); // Reorganiza o heap
+        trocar(0, i);
+        reorganizarHeap(i, 0, criterio);
     }
+}
+
+void Ordenacao::executarHeapSort(int criterio) {
+    comparacoes = 0;
+    copias = 0;
+
+    auto inicioTempo = std::chrono::high_resolution_clock::now();
+    heapSort(criterio);
+    auto fimTempo = std::chrono::high_resolution_clock::now();
+
+    printRelatorio("HeapSort", fimTempo - inicioTempo);
 }
 
 void Ordenacao::mergeSort(int inicio, int fim, int criterio) {
@@ -205,6 +229,17 @@ void Ordenacao::mergeSort(int inicio, int fim, int criterio) {
     }
 }
 
+void Ordenacao::executarMergeSort(int criterio) {
+    comparacoes = 0; 
+    copias = 0;
+
+    auto inicioTempo = std::chrono::high_resolution_clock::now();
+    mergeSort(0, numRegistros - 1, criterio);
+    auto fimTempo = std::chrono::high_resolution_clock::now();
+
+    printRelatorio("MergeSort", fimTempo - inicioTempo);
+}
+
 void Ordenacao::printRegistros() const {
     for (int i = 0; i < numRegistros; ++i) {
         if (listaRegistros[i] != nullptr) {
@@ -213,6 +248,14 @@ void Ordenacao::printRegistros() const {
     }
     std::cout << std::endl;
 }
+
+void Ordenacao::printRelatorio(const std::string& algoritmo, std::chrono::duration<double> duracao) const {
+    std::cout << "### " << algoritmo << " ###" << std::endl;
+    std::cout << "Comparações: " << comparacoes << std::endl;
+    std::cout << "Cópias: " << copias << std::endl;
+    std::cout << "Tempo de execução: " << duracao.count() << " segundos\n" << std::endl;
+}
+
 
 bool Ordenacao::validarRegistros() const {
     for (int i = 0; i < numRegistros; ++i) {

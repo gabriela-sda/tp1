@@ -1,6 +1,7 @@
 #ifndef ORDENACAO_H
 #define ORDENACAO_H
 
+#include <chrono>
 #include "../include/Registro.h"
 
 class Ordenacao {
@@ -9,6 +10,9 @@ class Ordenacao {
     Registro* listaRegistros[MAX_REGISTROS]; //array de ponteiros para objetos Registro
     Registro* listaInicial[MAX_REGISTROS];
     int numRegistros; //quantidade de registros no array
+
+    long long comparacoes;
+    long long copias;
 
     void trocar(int i, int j);
     int particionar(int inicio, int fim, int criterio);
@@ -21,10 +25,14 @@ class Ordenacao {
     ~Ordenacao();
 
     void quickSort(int inicio, int fim, int criterio);
+    void executarQuickSort(int criterio);
     void heapSort(int criterio);
+    void executarHeapSort(int criterio);
     void mergeSort(int inicio, int fim, int criterio);
+    void executarMergeSort(int criterio);
 
     void printRegistros() const;
+    void printRelatorio(const std::string& algoritmo, std::chrono::duration<double> duracao) const;
     bool validarRegistros() const;
     void reiniciarLista();
 };
